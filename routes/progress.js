@@ -1,27 +1,9 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
+const c = require('../controllers/progressController');
+const auth = require('../middleware/auth');
 
-const {
-    getMyProgress,
-    getProgressByMaterial,
-    updateProgress,
-    getLeaderboard,
-    getMyBadges
-} = require("../controllers/progressController");
-
-// ringkasan progres id user (xp)
-router.get("/", getMyProgress);
-
-// leaderboard
-router.get("/leaderboard", getLeaderboard);
-
-// badges punya user
-router.get("/badges", getMyBadges);
-
-// progress user di satu materi
-router.get("/material/:materialId", getProgressByMaterial);
-
-// update progress
-router.get("/update", updateProgress);
+router.get('/', auth, c.getMyProgress);
+router.post('/', auth, c.saveProgress);
 
 module.exports = router;

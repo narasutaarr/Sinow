@@ -1,5 +1,17 @@
-exports.getMyProgress = (req, res) => res.json({ message: "my progress" });
-exports.getProgressByMaterial = (req, res) => res.json({ message: `progress of material ${req.params.materialId}` });
-exports.updateProgress = (req, res) => res.json({ message: "update progress" });
-exports.getLeaderboard = (req, res) => res.json({ message: "leaderboard" });
-exports.getMyBadges = (req, res) => res.json({ message: "my badges" });
+const progressService = require('../services/progressServices');
+
+exports.getMyProgress = async (req, res) => {
+  try {
+    res.json(await progressService.getByUser(req.user.id));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.saveProgress = async (req, res) => {
+  try {
+    res.json(await progressService.save(req.user.id, req.body));
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
