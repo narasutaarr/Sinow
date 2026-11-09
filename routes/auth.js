@@ -7,6 +7,7 @@ const {
     getMe,
     logout
 } = require("../controllers/authController");
+const authMiddleware = require("../middleware/auth");
 
 // akun baru
 router.post("/register", register);
@@ -14,8 +15,8 @@ router.post("/register", register);
 // login
 router.post("/login", login);
 
-// ambil data user login
-router.get("/me", getMe);
+// ambil data user login (wajib token)
+router.get("/me", authMiddleware, getMe);
 
 // logout
 router.post("/logout", logout);
