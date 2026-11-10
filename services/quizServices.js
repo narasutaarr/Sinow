@@ -1,4 +1,5 @@
 const supabase = require("../config/supabase");
+const { getRank, POINT_CORRECT, POINT_WRONG } = require("../utils/rank");
 const { generateQuestions } = require("../utils/algebraTemplates");
 
 // siswa tidak boleh melihat jawaban benar, admin boleh
@@ -55,15 +56,46 @@ exports.remove = async (id) => {
 };
 
 // jawab satu soal
-exports.submitOne = async (id, answer) => {
+exports.submitOne = async (userId, id, answer) => {
   if (answer === undefined || answer === null) throw new Error("answer wajib diisi");
-  const { data, error } = await supabase
+
+  const { data: quiz, error } = await supabase
     .from("quizzes").select("id, correct_answer").eq("id", id).single();
   if (error) throw new Error("Kuis tidak ditemukan");
+
+  const correct = answer === quiz.correct_answer;
+
+  // sudah pernah dijawab? jangan hitung poin lagi
+  const { data: prev } = await supabase
+    .from("quiz_answers").select("id")
+    .eq("user_id", userId).eq("quiz_id", id).maybeSingle();
+
+  const { data: user } = await supabase
+    .from("users").select("points").eq("id", userId).single();
+  let points = user.points;
+  let change = 0;
+
+  if (!prev) {
+    change = correct ? POINT_CORRECT : POINT_WRONG;
+    points = Math.max(0, points + change);
+
+    const { error: e1 } = await supabase.from("quiz_answers").insert({
+      user_id: userId, quiz_id: id, is_correct: correct, points_change: change,
+    });
+    if (e1) throw new Error(e1.message);
+
+    const { error: e2 } = await supabase
+      .from("users").update({ points }).eq("id", userId);
+    if (e2) throw new Error(e2.message);
+  }
+
   return {
-    quiz_id: data.id,
-    correct: answer === data.correct_answer,
-    correct_answer: data.correct_answer,
+    quiz_id: id,
+    correct,
+    points_change: change,
+    already_answered: !!prev,
+    points,
+    rank: getRank(points),
   };
 };
 

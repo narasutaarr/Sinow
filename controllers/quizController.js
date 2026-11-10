@@ -27,3 +27,7 @@ exports.submitByMaterial = handle(
   (req) => quizService.submitByMaterial(req.params.materialId, req.body.answers)
 );
 exports.generateAlgebra = handle((req) => quizService.generateAlgebra(req.body), 201);
+
+exports.submitQuiz = handle(
+  (req) => quizService.submitOne(req.user.id, req.params.id, req.body.answer)
+);

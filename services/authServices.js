@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const supabase = require('../config/supabase');
+const { getRank } = require('../utils/rank');
 
 const createToken = (user) =>
   jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
@@ -53,10 +54,7 @@ exports.login = async ({ email, password }) => {
 
 exports.getMe = async (id) => {
   const { data, error } = await supabase
-    .from('users')
-    .select('id, name, email, role')
-    .eq('id', id)
-    .single();
+    .from('users').select('id, name, email, role, points').eq('id', id).single();
   if (error) throw new Error('User tidak ditemukan');
-  return data;
+  return { ...data, rank: getRank(data.points) };
 };
