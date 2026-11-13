@@ -4,6 +4,7 @@ import Home from './pages/Home.jsx'
 import Materi from './pages/Materi.jsx'
 import BabDetail from './pages/BabDetail.jsx'
 import Placeholder from './pages/Placeholder.jsx'
+import Profil from './pages/Profil.jsx'
 
 export default function App() {
   return (
@@ -14,7 +15,7 @@ export default function App() {
         <Route path="materi/:babId" element={<BabDetail />} />
         <Route path="peringkat" element={<Placeholder title="Peringkat Belajar" />} />
         <Route path="ai" element={<Placeholder title="Belajar Bersama AI" />} />
-        <Route path="profil" element={<Placeholder title="Profil" />} />
+        <Route path="profil" element={<Profil />} />
         <Route path="*" element={<Placeholder title="Halaman tidak ditemukan" />} />
       </Route>
     </Routes>

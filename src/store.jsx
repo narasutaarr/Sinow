@@ -21,12 +21,22 @@ export function StoreProvider({ children }) {
     try { localStorage.setItem(KEY, JSON.stringify(chapters)) } catch { /* abaikan */ }
   }, [chapters])
 
+  const PROFILE_KEY = 'belajar-photo-v1'
+  const [photo, setPhoto] = useState(() => {
+    try { return localStorage.getItem(PROFILE_KEY) || '' } catch { return '' }
+  })
+  useEffect(() => {
+    try { photo ? localStorage.setItem(PROFILE_KEY, photo) : localStorage.removeItem(PROFILE_KEY) } catch { /* abaikan */ }
+  }, [photo])
+
   const update = (babId, fn) =>
     setChapters(cs => cs.map(c => (c.id === babId ? { ...c, materi: fn(c.materi) } : c)))
 
   const value = {
     user: seed.user,
     chapters,
+    photo,
+    setPhoto,
     addMateri: (babId, m) => update(babId, l => [...l, { ...m, id: uid(), done: false }]),
     editMateri: (babId, id, m) => update(babId, l => l.map(x => (x.id === id ? { ...x, ...m } : x))),
     removeMateri: (babId, id) => update(babId, l => l.filter(x => x.id !== id)),

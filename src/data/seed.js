@@ -2,7 +2,7 @@
 // Materi yang ditambah lewat aplikasi disimpan di localStorage browser.
 // Kalau mengubah file ini dan hasilnya tidak berubah, ganti KEY di src/store.jsx (mis. v2).
 export const seed = {
-  user: { name: 'Danieka Raffly', streak: 10, todayPct: 58, todayMin: 28 },
+  user: { name: 'Franky', username: 'franky', streak: 10, todayPct: 58, todayMin: 28 },
   chapters: [
     {
       id: 'bab-1',
