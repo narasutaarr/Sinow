@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import Icon from './Icon.jsx'
 import { useStore } from '../store.jsx'
+import { useAuth } from '../auth.jsx'
 
 const nav = [
   { to: '/', label: 'Home', icon: 'home', end: true },
@@ -11,6 +12,7 @@ const nav = [
 
 export default function Layout() {
   const { user } = useStore()
+  const { session, logout } = useAuth()
   return (
     <div className="flex min-h-screen pb-20 lg:pb-0">
       {/* Sidebar desktop */}
@@ -41,9 +43,10 @@ export default function Layout() {
         <header className="flex items-center justify-between border-b border-black/70 pb-5 sm:pb-7">
           <div className="flex items-center gap-3 sm:gap-5">
             <div className="grid size-12 place-items-center rounded-full bg-gradient-to-b from-[#f4a0a8] to-[#e8808c] text-3xl shadow-md sm:size-16 sm:text-4xl" aria-hidden="true">🧑‍🎓</div>
-            <h1 className="text-base font-semibold sm:text-xl">Hello {user.name}</h1>
+            <h1 className="text-base font-semibold sm:text-xl">Hello {session.username}</h1>
           </div>
           <div className="flex items-center gap-4 sm:gap-6">
+            <button onClick={logout} className="rounded-full bg-panel px-4 py-2 text-xs font-semibold">Keluar</button>
             <button aria-label="Notifikasi"><Icon name="bell" className="size-7 sm:size-8" /></button>
             <button aria-label="Menu"><Icon name="menu" className="size-8 sm:size-9" /></button>
           </div>

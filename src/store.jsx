@@ -29,14 +29,34 @@ export function StoreProvider({ children }) {
     try { photo ? localStorage.setItem(PROFILE_KEY, photo) : localStorage.removeItem(PROFILE_KEY) } catch { /* abaikan */ }
   }, [photo])
 
+  const GAME_KEY = 'belajar-games-v1'
+const [games, setGames] = useState(() => {
+  try { return JSON.parse(localStorage.getItem(GAME_KEY)) || [] } catch { return [] }
+})
+useEffect(() => {
+  try { localStorage.setItem(GAME_KEY, JSON.stringify(games)) } catch { /* abaikan */ }
+}, [games])
+
+const gamePoints = games.reduce((n, g) => n + g.points, 0)
+const gameHistory = games
+  .map(g => ({ id: g.id, title: `Kuis: ${g.correct}/${g.total} benar`, date: g.date, points: g.points }))
+  .reverse()
+
   const update = (babId, fn) =>
     setChapters(cs => cs.map(c => (c.id === babId ? { ...c, materi: fn(c.materi) } : c)))
 
   const value = {
-    user: seed.user,
+    user: { ...seed.user, points: seed.user.points + gamePoints },
     chapters,
     photo,
     setPhoto,
+    pointHistory: [...gameHistory, ...seed.pointHistory],
+    games,
+    addGame: g => setGames(l => [...l, {
+      ...g,
+      id: uid(),
+      date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+    }]),
     addMateri: (babId, m) => update(babId, l => [...l, { ...m, id: uid(), done: false }]),
     editMateri: (babId, id, m) => update(babId, l => l.map(x => (x.id === id ? { ...x, ...m } : x))),
     removeMateri: (babId, id) => update(babId, l => l.filter(x => x.id !== id)),

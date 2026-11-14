@@ -5,3 +5,5 @@ export const ranks = [
   { id: 'diamond', label: 'Diamond', min: 3000, color: '#3aa8e8' },
   { id: 'master', label: 'Master', min: 5000, color: '#3aa8e8' },
 ]
+
+export const getRank = points => ranks.reduce((acc, r) => (points >= r.min ? r : acc), ranks[0])

@@ -56,9 +56,9 @@ export default function Home() {
           <ProgressRing pct={pct} />
         </Link>
 
-        <div className={`${card} flex flex-col justify-center bg-lilac py-5`}>
+        <Link to="/kuis" className={`${card} flex flex-col justify-center bg-lilac py-5`}>
           <div className="flex items-center gap-2.5 text-base font-semibold lg:text-lg">
-            <Icon name="open" className="size-9" /> Learnings today
+            <Icon name="open" className="size-9" /> Kuis
           </div>
           <p className="mt-5 text-2xl font-semibold lg:text-3xl">
             {user.todayPct}<span className="text-xl">%</span> / {user.todayMin} min
@@ -67,7 +67,7 @@ export default function Home() {
             aria-valuenow={user.todayPct} aria-valuemin={0} aria-valuemax={100}>
             <div className="h-full rounded-full bg-mint" style={{ width: `${user.todayPct}%` }} />
           </div>
-        </div>
+        </Link>
       </section>
     </>
   )

@@ -1,8 +1,6 @@
-// Data awal. Tambah bab / materi langsung di sini, atau lewat tombol "Tambah materi" di aplikasi.
-// Materi yang ditambah lewat aplikasi disimpan di localStorage browser.
-// Kalau mengubah file ini dan hasilnya tidak berubah, ganti KEY di src/store.jsx (mis. v2).
+
 export const seed = {
-  user: { name: 'Franky', username: 'franky', streak: 10, todayPct: 58, todayMin: 28 },
+  user: { name: 'Franky', username: 'franky', streak: 10, points: 1000, todayPct: 58, todayMin: 28 },
   chapters: [
     {
       id: 'bab-1',
@@ -21,5 +19,12 @@ export const seed = {
     { id: 'bab-2', bab: 'BAB II', title: 'Aljabar', materi: [] },
     { id: 'bab-3', bab: 'BAB III', title: 'Geometri dan Pengukuran', materi: [] },
     { id: 'bab-4', bab: 'BAB IV', title: 'Data dan Statistika', materi: [] },
+  ],
+  pointHistory: [
+  { id: 'p1', title: 'Menyelesaikan materi Bilangan bulat', date: '13 Nov 2026', points: 50 },
+  { id: 'p2', title: 'Streak 10 hari', date: '13 Nov 2026', points: 100 },
+  { id: 'p3', title: 'Kuis BAB I', date: '12 Nov 2026', points: 80 },
+  { id: 'p4', title: 'Belajar bersama AI', date: '11 Nov 2026', points: 30 },
+  { id: 'p5', title: 'Menyelesaikan materi Aljabar', date: '10 Nov 2026', points: 50 },
   ],
 }
