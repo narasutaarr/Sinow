@@ -36,3 +36,4 @@ export async function api(path, { method = 'GET', body, auth = true } = {}) {
   }
   return data
 }
+
