@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Lexend", ui-sans-serif, system-ui, sans-serif;
+  --color-lilac: #e0d5f4;
+  --color-rose: #cd7878;
+  --color-mint: #7ec9b9;
+  --color-mint-soft: #d4f1eb;
+  --color-mint-active: #a8e8d9;
+  --color-periwinkle: #a9bde8;
+  --color-panel: #f3f3f3;
+  --shadow-card: 0 4px 4px rgb(0 0 0 / 0.35);
+}
+
+body { @apply bg-white font-sans text-black antialiased; }
+:focus-visible { outline: 2px solid #5b4b8a; outline-offset: 2px; }
