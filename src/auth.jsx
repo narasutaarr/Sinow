@@ -1,56 +1,80 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { api, getSession } from './lib/api.js'
 
-const USERS_KEY = 'sinow-users-v1'
-const SESSION_KEY = 'sinow-session-v1'
+const KEY = 'sinow-session-v1'
 const Ctx = createContext(null)
 export const useAuth = () => useContext(Ctx)
 
-const read = (store, key, fallback) => {
-  try { return JSON.parse(store.getItem(key)) ?? fallback } catch { return fallback }
-}
-const write = (store, key, value) => {
-  try { store.setItem(key, JSON.stringify(value)) } catch { /* abaikan */ }
-}
+const pickName = d =>
+  d?.user?.nama ?? d?.user?.name ?? d?.nama ?? d?.name ?? d?.data?.nama ?? d?.data?.name ?? null
 
 export function AuthProvider({ children }) {
-  // "Ingatkan saya" aktif -> localStorage, nonaktif -> sessionStorage (hilang saat tab ditutup)
-  const [session, setSession] = useState(
-    () => read(localStorage, SESSION_KEY, null) ?? read(sessionStorage, SESSION_KEY, null)
-  )
+  const [session, setSession] = useState(getSession)
 
   const clear = () => {
-    try { localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY) } catch { /* abaikan */ }
+    try { localStorage.removeItem(KEY); sessionStorage.removeItem(KEY) } catch { /* abaikan */ }
   }
 
-  const start = (username, remember) => {
-    const s = { username }
+  // "Ingatkan saya" aktif -> localStorage, nonaktif -> sessionStorage
+  const start = (s, remember) => {
     clear()
-    write(remember ? localStorage : sessionStorage, SESSION_KEY, s)
+    try { (remember ? localStorage : sessionStorage).setItem(KEY, JSON.stringify(s)) } catch { /* abaikan */ }
     setSession(s)
-  }
-
-  const register = ({ username, email, password }) => {
-    const users = read(localStorage, USERS_KEY, [])
-    const u = username.trim().toLowerCase()
-    const e = email.trim().toLowerCase()
-    if (users.some(x => x.username.toLowerCase() === u)) return { ok: false, error: 'Username sudah dipakai.' }
-    if (users.some(x => x.email === e)) return { ok: false, error: 'Email sudah terdaftar.' }
-    write(localStorage, USERS_KEY, [...users, { username: username.trim(), email: e, password }])
-    start(username.trim(), true)
-    return { ok: true }
-  }
-
-  const login = ({ username, password, remember }) => {
-    const users = read(localStorage, USERS_KEY, [])
-    const found = users.find(
-      x => x.username.toLowerCase() === username.trim().toLowerCase() && x.password === password
-    )
-    if (!found) return { ok: false, error: 'Username atau password salah.' }
-    start(found.username, remember)
-    return { ok: true }
   }
 
   const logout = () => { clear(); setSession(null) }
 
-  return <Ctx.Provider value={{ session, register, login, logout }}>{children}</Ctx.Provider>
+  const rename = name => setSession(s => {
+  if (!s || !name || s.username === name) return s
+  const next = { ...s, username: name }
+  try {
+    const store = localStorage.getItem(KEY) ? localStorage : sessionStorage
+    store.setItem(KEY, JSON.stringify(next))
+  } catch { /* abaikan */ }
+  return next
+})
+
+const loadName = async () => {
+  try {
+    rename(pickName(await api('/api/auth/me')))
+  } catch { /* abaikan, nama tetap seperti sekarang */ }
+}
+const login = async ({ username, password, remember }) => {
+  try {
+    const data = await api('/api/auth/login', {
+      method: 'POST', auth: false,
+      body: { email: username, password },
+    })
+    start({ username: pickName(data) ?? username, token: data.token }, remember)
+    loadName()   // ambil nama dari /api/auth/me
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, error: e.message }
+  }
+}
+
+
+const register = async ({ username, email, password }) => {
+  try {
+    await api('/api/auth/register', {
+      method: 'POST', auth: false,
+      body: { name: username, email, password },   // ← kirim nama dan name
+    })
+    return login({ username: email, password, remember: true })
+  } catch (e) {
+    return { ok: false, error: e.message }
+  }
+}
+
+  // Token ditolak backend (kedaluwarsa) -> keluar otomatis
+  useEffect(() => {
+    window.addEventListener('auth:expired', logout)
+    return () => window.removeEventListener('auth:expired', logout)
+  }, [])
+
+  useEffect(() => {
+    if (getSession()) loadName()
+  }, [])
+
+  return <Ctx.Provider value={{ session, login, register, logout }}>{children}</Ctx.Provider>
 }

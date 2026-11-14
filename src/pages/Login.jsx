@@ -1,18 +1,22 @@
 import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
-import AuthShell, { Field } from 'src/components/AuthShell.jsx'
+import AuthShell, { Field } from '../components/authshell.jsx'
 import { useAuth } from '../auth.jsx'
 
 export default function Login() {
   const { session, login } = useAuth()
   const [f, setF] = useState({ username: '', password: '', remember: false })
   const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
 
   if (session) return <Navigate to="/" replace />
 
-  const submit = e => {
+  const submit = async e => {
     e.preventDefault()
-    const res = login(f)
+    setError('')
+    setBusy(true)
+    const res = await login(f)
+    setBusy(false)
     if (!res.ok) setError(res.error)
   }
 
@@ -38,8 +42,9 @@ export default function Login() {
 
         {error && <p role="alert" className="text-center text-xs text-[#c0392b]">{error}</p>}
 
-        <button className="mt-4 w-full rounded-2xl bg-[#a1b5e0] py-2.5 text-lg transition-transform hover:-translate-y-0.5">
-          Masuk
+        <button disabled={busy}
+          className="mt-4 w-full rounded-2xl bg-[#a1b5e0] py-2.5 text-lg transition-transform hover:-translate-y-0.5 disabled:opacity-60">
+          {busy ? 'Memproses...' : 'Masuk'}
         </button>
       </form>
 

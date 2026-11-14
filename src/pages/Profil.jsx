@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useStore } from '../store.jsx'
 import { ranks } from '../data/ranks.js'
+import { useAuth } from '../auth.jsx'
 
 const toDataUrl = (file, size = 320) =>
   new Promise((resolve, reject) => {
@@ -48,6 +49,7 @@ function Stat({ value, label, bg }) {
 }
 
 export default function Profil() {
+  const { session } = useAuth()
   const { user, chapters, photo, setPhoto } = useStore()
   const input = useRef(null)
   const totalModul = chapters.reduce((n, c) => n + c.materi.filter(m => m.done).length, 0)
@@ -72,7 +74,7 @@ export default function Profil() {
             Ganti foto
           </span>
         </button>
-        <h2 className="mt-6 text-3xl font-semibold">{user.username}</h2>
+        <h2 className="mt-6 break-words text-center text-3xl font-semibold">{session.username}</h2>
         <div className="mt-4 flex gap-2">
           <button onClick={() => input.current.click()} className="rounded-full bg-white px-4 py-2 text-xs font-semibold">Ganti foto</button>
           {photo && <button onClick={() => setPhoto('')} className="rounded-full bg-mint-soft px-4 py-2 text-xs font-semibold">Hapus</button>}

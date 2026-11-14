@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+
 import Layout from './components/Layout.jsx'
 import Home from './pages/Home.jsx'
 import Materi from './pages/Materi.jsx'
@@ -11,6 +11,7 @@ import { Navigate, Outlet, Routes, Route } from 'react-router-dom'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import { useAuth } from './auth.jsx'
+import ChatAI from './pages/ChatAI.jsx'
 
 function RequireAuth() {
   const { session } = useAuth()
@@ -28,7 +29,7 @@ export default function App() {
         <Route path="materi" element={<Materi />} />
         <Route path="materi/:babId" element={<BabDetail />} />
         <Route path="peringkat" element={<Peringkat />} />
-        <Route path="ai" element={<Placeholder title="Belajar Bersama AI" />} />
+        <Route path="ai" element={<ChatAI />} />
         <Route path="profil" element={<Profil />} />
         <Route path="kuis" element={<Kuis />} />
         <Route path="*" element={<Placeholder title="Halaman tidak ditemukan" />} />
