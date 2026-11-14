@@ -2,7 +2,6 @@ const supabase = require("../config/supabase");
 const { getRank, POINT_CORRECT, POINT_WRONG } = require("../utils/rank");
 const { generateQuestions } = require("../utils/algebraTemplates");
 
-// siswa tidak boleh melihat jawaban benar, admin boleh
 const cols = (withAnswer) =>
   withAnswer
     ? "id, material_id, question, options, correct_answer, created_at"
@@ -43,7 +42,6 @@ exports.update = async (id, body) => {
     if (body[k] !== undefined) fields[k] = body[k];
   }
   if (Object.keys(fields).length === 0) throw new Error("Tidak ada data yang diubah");
-
   const { data, error } = await supabase
     .from("quizzes").update(fields).eq("id", id).select().single();
   if (error) throw new Error(error.message);
@@ -55,7 +53,6 @@ exports.remove = async (id) => {
   if (error) throw new Error(error.message);
 };
 
-// jawab satu soal
 exports.submitOne = async (userId, id, answer) => {
   if (answer === undefined || answer === null) throw new Error("answer wajib diisi");
 
@@ -65,13 +62,14 @@ exports.submitOne = async (userId, id, answer) => {
 
   const correct = answer === quiz.correct_answer;
 
-  // sudah pernah dijawab? jangan hitung poin lagi
   const { data: prev } = await supabase
     .from("quiz_answers").select("id")
     .eq("user_id", userId).eq("quiz_id", id).maybeSingle();
 
-  const { data: user } = await supabase
+  const { data: user, error: userErr } = await supabase
     .from("users").select("points").eq("id", userId).single();
+  if (userErr || !user) throw new Error(userErr?.message || "User tidak ditemukan");
+
   let points = user.points;
   let change = 0;
 
@@ -80,7 +78,7 @@ exports.submitOne = async (userId, id, answer) => {
     points = Math.max(0, points + change);
 
     const { error: e1 } = await supabase.from("quiz_answers").insert({
-      user_id: userId, quiz_id: id, is_correct: correct, points_change: change,
+      user_id: userId, quiz_id: id, answer, is_correct: correct, points_change: change,
     });
     if (e1) throw new Error(e1.message);
 
@@ -99,7 +97,6 @@ exports.submitOne = async (userId, id, answer) => {
   };
 };
 
-// answers: [{ quiz_id, answer }]
 exports.submitByMaterial = async (materialId, answers) => {
   if (!Array.isArray(answers) || answers.length === 0) {
     throw new Error("answers wajib berupa array");
@@ -113,7 +110,7 @@ exports.submitByMaterial = async (materialId, answers) => {
     const given = answers.find((a) => a.quiz_id === q.id);
     const ok = !!given && given.answer === q.correct_answer;
     if (ok) correct++;
-    return { quiz_id: q.id, correct: ok, correct_answer: q.correct_answer };
+    return { quiz_id: q.id, correct: ok };
   });
 
   const total = questions.length;

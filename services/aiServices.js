@@ -1,5 +1,6 @@
 const supabase = require('../config/supabase');
 const { getRank } = require('../utils/rank');
+const { TOPICS } = require('../utils/topics');
 
 // Gemini
 const callGemini = async ({ system, contents, json = false }) => {
@@ -35,9 +36,9 @@ const getStats = async (userId) => {
   const { data: user } = await supabase
     .from('users').select('name, points').eq('id', userId).single();
 
-  const { data: answers } = await supabase
+    const { data: answers } = await supabase
     .from('quiz_answers')
-    .select('is_correct, created_at, quizzes(question, materials(title))')
+    .select('is_correct, created_at, quizzes(question, topic)')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(200);
@@ -51,14 +52,14 @@ const getStats = async (userId) => {
   const total = list.length;
   const correct = list.filter((a) => a.is_correct).length;
 
-  // akurasi per materi
-  const byTopic = {};
-  for (const a of list) {
-    const t = a.quizzes?.materials?.title || 'Lainnya';
+    // akurasi per topik
+    const byTopic = {};
+    for (const a of list) {
+    const t = TOPICS[a.quizzes?.topic]?.title || 'Lainnya';
     byTopic[t] ??= { total: 0, correct: 0 };
     byTopic[t].total++;
     if (a.is_correct) byTopic[t].correct++;
-  }
+    }
   const topics = Object.entries(byTopic)
     .map(([title, v]) => ({
       title, total: v.total, accuracy: Math.round((v.correct / v.total) * 100),
@@ -121,11 +122,10 @@ Aturan adaptasi: akurasi < 60% pada topik = turunkan tingkat, lebih banyak conto
 `.trim();
 
 // ---------- Helper materi ----------
-const getMaterial = async (id) => {
-  const { data, error } = await supabase
-    .from('materials').select('title, content').eq('id', id).single();
-  if (error) throw new Error('Materi tidak ditemukan');
-  return data;
+const getMaterial = async (key) => {
+  const t = TOPICS[key];
+  if (!t) throw new Error(`Topik tidak dikenal. Pilihan: ${Object.keys(TOPICS).join(', ')}`);
+  return { title: t.title, content: t.scope };
 };
 
 // ---------- Fitur ----------
@@ -212,3 +212,5 @@ ${m.content}`;
 };
 
 exports.getStats = getStats;
+exports.callGemini = callGemini;
+exports.userMsg = userMsg;

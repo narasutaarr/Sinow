@@ -1,9 +1,9 @@
 const RANKS = [
-  { name: 'Perunggu', min: 0 },
-  { name: 'Perak', min: 100 },
-  { name: 'Emas', min: 300 },
-  { name: 'Platinum', min: 600 },
-  { name: 'Berlian', min: 1000 },
+  { name: 'Bronze', min: 0 },
+  { name: 'Silver', min: 100 },
+  { name: 'Gold', min: 300 },
+  { name: 'Diamond', min: 600 },
+  { name: 'Master', min: 1000 },
 ];
 
 const POINT_CORRECT = 10;

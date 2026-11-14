@@ -9,7 +9,10 @@ const {
     deleteQuiz,
     submitQuiz,
     submitByMaterial,
-    generateAlgebra
+    generateAlgebra,
+    getTopics,
+    startQuiz,
+    finishAttempt
 } = require("../controllers/quizController");
 const auth = require("../middleware/auth");
 const role = require("../middleware/role");
@@ -23,6 +26,11 @@ router.post("/material/:materialId/submit", auth, submitByMaterial);
 // generate soal aljabar (admin)
 router.post("/generate-algebra", auth, role("admin"), generateAlgebra);
 
+router.get("/topics", auth, getTopics);
+
+router.post("/start", auth, startQuiz);
+
+router.post("/attempt/:id/finish", auth, finishAttempt);
 // get kuis by id
 router.get("/:id", auth, getQuizById);
 
